@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 import pickle
 import streamlit as st
 from streamlit_option_menu import option_menu
+from PIL import Image, ImageOps
+from img_classification import teachable_machine_classification
 
 
 # loading the saved models
@@ -28,8 +29,11 @@ with st.sidebar:
                            'Heart Disease Prediction',
                            'Parkinsons Prediction',
                            'Covid-19 Prediction',
-                           'High Blood Pressure Prediction'],
-                          icons=['activity','heart','person'],
+                           'High Blood Pressure Prediction',
+                           'Breast Cancer Prediction',
+                           'Brain Tumor Prediction',
+                           'Mask Detection'],
+                          icons=['activity','heart','person','list','list','list','list','mask'],
                           default_index=0)
     
     
@@ -356,17 +360,66 @@ if (selected == 'High Blood Pressure Prediction'):
 
     st.success(blood_diagnosis)
 
+# Breast Cancer
+if (selected == 'Breast Cancer Prediction'):
+    st.title("Image Classification with Google's Teachable Machine")
+    st.header("Breast Cancer Ultrasound Classification Example")
+    st.text("Upload a scan for Classification")
 
 
+    uploaded_file = st.file_uploader("Choose a scan ...", type="png")
+    
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption='Uploaded Scan.', use_column_width=True)
+        st.write("")
+        st.write("Classifying...")
+        label = teachable_machine_classification(image, 'model/keras_model.h5')
+        if label == 0:
+            st.write("The scan is normal")
+        elif label == 1:
+            st.write("The scan is malignant")
+        else:
+            st.write("The scan is benign")
 
 
+#Brain Tumor
+if (selected == 'Brain Tumor Prediction'):
+    st.title("Image Classification with Google's Teachable Machine")
+    st.header("Brain Tumor Classification Example")
+    st.text("Upload a scan for Classification")
+
+    #uploaded_file = st.camera_input("Choose a scan ...", key="firstCamera")
+    uploaded_file = st.file_uploader("Choose a scan ...", type="jpg")
+
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption='Uploaded Scan.', use_column_width=True)
+        st.write("")
+        st.write("Classifying...")
+        label = teachable_machine_classification(image, 'model/keras_model_tumor.h5')
+        if label == 0:
+            st.write("Pituitary Tumor")
+        else:
+            st.write("No Tumor")
 
 
+#Mask Detection
+if (selected == 'Mask Detection'):
+    st.title("Image Classification with Google's Teachable Machine")
+    st.header("Mask Detection")
+    st.text("Capture a Image for Classification")
+    
+    uploaded_file = st.camera_input("Capture Image...", key="firstCamera")
+    
 
-
-
-
-
-
-
-
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption='Capture Image', use_column_width=True)
+        st.write("")
+        st.write("Detecting...")
+        label = teachable_machine_classification(image, 'model/keras_model_mask.h5')
+        if label == 0:
+            st.write("With Mask")
+        else:
+            st.write("Without Mask")
